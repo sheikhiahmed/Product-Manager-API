@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/products")
 
 public class ProductController {
     private final ProductService productService;
@@ -21,21 +21,21 @@ public class ProductController {
         this.productService = productService;
     }
     //Receive DTO and createProduct it as Entity
-    @PostMapping("/createProduct")
+    @PostMapping()
     public ResponseEntity<ProductDTO> save(@Valid @RequestBody ProductDTO productDTO){
         ProductDTO save = productService.createProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
 
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         List<ProductDTO> products = productService.getAllProducts();
         return ResponseEntity.ok().body(products);
     }
 
     //Admin use only
-    @GetMapping("/productById/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
         Product product = productService.getProductById(id);
         if (product == null) {
