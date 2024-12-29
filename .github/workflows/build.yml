@@ -16,12 +16,11 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-    
-    
+    runs-on: ubuntu-latest
+
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:8
         ports:
           - 3306:3306
         options: |
@@ -32,7 +31,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootroot
           MYSQL_DATABASE: PRODUCT_MANAGER
-    
 
     steps:
       - name: Checkout code
@@ -48,5 +46,8 @@ jobs:
       - name: Build application
         run: |
           mvn clean install
-          echo ${{vars.REPOSITORY}}
+          echo ${{env.repository}}
+      
+      - name: Check MySQL container logs
+        run: docker logs mysql
 
