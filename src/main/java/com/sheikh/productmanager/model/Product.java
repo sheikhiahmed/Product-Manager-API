@@ -1,4 +1,4 @@
-package com.sheikh.productmanager.dao;
+package com.sheikh.productmanager.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
