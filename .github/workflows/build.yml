@@ -16,11 +16,12 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-22.04
+    
+    
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         ports:
           - 3306:3306
         options: |
@@ -31,6 +32,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootroot
           MYSQL_DATABASE: PRODUCT_MANAGER
+    
 
     steps:
       - name: Checkout code
