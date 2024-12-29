@@ -1,4 +1,4 @@
-name: Project Build
+name: Project build
 
 on:
   push:
@@ -11,42 +11,40 @@ on:
       - feature-branch
 
 env:
-  repository: 'te-maven-release-local'
-  repository_snapshot: 'te-maven-snapshot-local'
+    repository: 'te-maven-release-local'
+    repository_snapshot: 'te-maven-snapshot-local'
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # Update for compatibility with ubuntu-24.04
+    runs-on: ubuntu-latest
+
 
     services:
       mysql:
-        image: mysql:5.7  # Change to a more stable version like 5.7
+        image: mysql:5.7
         ports:
           - 3306:3306
-        options: |
+        options: >-
           --health-cmd="mysqladmin ping --silent"
-          --health-interval=5s
+          --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
         env:
           MYSQL_ROOT_PASSWORD: rootroot
           MYSQL_DATABASE: PRODUCT_MANAGER
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
 
-      - name: Build application
-        run: |
-          mvn clean install
-          echo ${{env.repository}}
-
-      - name: Check MySQL container logs
-        run: docker logs mysql
+    - name: build application
+      run: |
+        mvn clean install
+        echo ${{vars.REPOSITORY}}
