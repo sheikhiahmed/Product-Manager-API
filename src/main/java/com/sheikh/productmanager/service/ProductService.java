@@ -2,11 +2,10 @@ package com.sheikh.productmanager.service;
 
 import com.sheikh.productmanager.dao.ProductRepository;
 import com.sheikh.productmanager.dto.ProductDTO;
-import com.sheikh.productmanager.exception.NoProductFoundException;
+import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,7 +43,7 @@ public class ProductService {
     public List<ProductDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         if(products.isEmpty()){
-            throw new NoProductFoundException("No Product found");
+            throw new ProductNotFoundException("No Product found");
         }
         // Fetch all products and map them to ProductDTO
         return productRepository.findAll().stream()
@@ -62,11 +61,11 @@ public class ProductService {
        if(product.isPresent()){
            return product.get();
     } else {
-           throw new NoProductFoundException("No Product Found with id" + id);
+           throw new ProductNotFoundException("No Product Found with id" + id);
        }
     }
 
-    public List<Product> showProduct(){
+    public List<Product> showProducts(){
         List<Product> p = productRepository.findAll();
         return p;
     }

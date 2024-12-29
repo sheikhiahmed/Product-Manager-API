@@ -1,6 +1,7 @@
 package com.sheikh.productmanager.controller;
 
 import com.sheikh.productmanager.dto.ProductDTO;
+import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
 import com.sheikh.productmanager.service.ProductService;
 import jakarta.validation.Valid;
@@ -37,20 +38,23 @@ public class ProductController {
     @GetMapping("/productById/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
         Product product = productService.getProductById(id);
+        if (product == null) {
+            throw new ProductNotFoundException("Product not found with ID: " + id);
+        }
         return ResponseEntity.ok().body(product);
     }
 
     //Admin use only
     @GetMapping("/show")
-    public ResponseEntity<List<Product>> showProduct(){
-        List<Product> p = productService.showProduct();
+    public ResponseEntity<List<Product>> showProducts(){
+        List<Product> p = productService.showProducts();
         return ResponseEntity.ok().body(p);
     }
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductDTO>> getProductByCategory(@PathVariable ("category") String category){
-        List<ProductDTO> productDTOS = productService.getProductByCategory(category);
-        return ResponseEntity.ok().body(productDTOS);
+        List<ProductDTO> products = productService.getProductByCategory(category);
+        return ResponseEntity.ok().body(products);
 
     }
 
