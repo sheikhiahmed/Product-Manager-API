@@ -5,6 +5,10 @@ import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.model.Product;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
@@ -33,5 +37,17 @@ public class ProductService {
         return responseDTO;
 
 
+    }
+
+    public List<ProductDTO> getAllProducts() {
+        // Fetch all products and map them to ProductDTO
+        return productRepository.findAll().stream()
+                .map(product -> new ProductDTO(
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getCategory()
+                ))
+                .collect(Collectors.toList());
     }
 }
