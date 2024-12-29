@@ -72,4 +72,16 @@ public class ProductService {
     }
 
 
+    public List<ProductDTO> getProductByCategory(String category) {
+        List<Product> products = productRepository.findByCategory(category);
+        return products.stream()
+                .map(product -> new ProductDTO(
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getCategory()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
