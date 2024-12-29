@@ -2,8 +2,13 @@ package com.sheikh.productmanager.service;
 
 import com.sheikh.productmanager.dao.ProductRepository;
 import com.sheikh.productmanager.dto.ProductDTO;
+import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -34,4 +39,48 @@ public class ProductService {
 
 
     }
+
+    public List<ProductDTO> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        if(products.isEmpty()){
+            throw new ProductNotFoundException("No Product found");
+        }
+        // Fetch all products and map them to ProductDTO
+        return productRepository.findAll().stream()
+                .map(product -> new ProductDTO(
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getCategory()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public Product getProductById(Long id){
+        Optional<Product> product = productRepository.findById(id);
+       if(product.isPresent()){
+           return product.get();
+    } else {
+           throw new ProductNotFoundException("No Product Found with id" + id);
+       }
+    }
+
+    public List<Product> showProducts(){
+        List<Product> p = productRepository.findAll();
+        return p;
+    }
+
+
+    public List<ProductDTO> getProductByCategory(String category) {
+        List<Product> products = productRepository.findByCategory(category);
+        return products.stream()
+                .map(product -> new ProductDTO(
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getCategory()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
