@@ -16,18 +16,18 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Update for compatibility with ubuntu-24.04
 
     services:
       mysql:
-        image: mysql:8
+        image: mysql:5.7  # Change to a more stable version like 5.7
         ports:
           - 3306:3306
         options: |
           --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=3
         env:
           MYSQL_ROOT_PASSWORD: rootroot
           MYSQL_DATABASE: PRODUCT_MANAGER
@@ -47,7 +47,6 @@ jobs:
         run: |
           mvn clean install
           echo ${{env.repository}}
-      
+
       - name: Check MySQL container logs
         run: docker logs mysql
-
