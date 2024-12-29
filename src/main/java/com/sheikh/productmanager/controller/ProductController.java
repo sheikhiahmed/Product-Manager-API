@@ -1,6 +1,7 @@
 package com.sheikh.productmanager.controller;
 
 import com.sheikh.productmanager.dto.ProductDTO;
+import com.sheikh.productmanager.model.Product;
 import com.sheikh.productmanager.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,18 @@ public class ProductController {
         return ResponseEntity.ok().body(products);
     }
 
+    //Admin use only
+    @GetMapping("/productById/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok().body(product);
+    }
+
+    //Admin use only
+    @GetMapping("/show")
+    public ResponseEntity<List<Product>> showProduct(){
+        List<Product> p = productService.showProduct();
+        return ResponseEntity.ok().body(p);
+    }
 
 }
