@@ -1,4 +1,4 @@
-name: Project Build
+name: Project build
 
 on:
   push:
@@ -18,12 +18,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+
     services:
       mysql:
         image: mysql:5.7
         ports:
           - 3306:3306
-        options: |
+        options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
@@ -43,8 +44,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build application
+      - name: build application
         run: |
           mvn clean install
           echo ${{vars.REPOSITORY}}
-
