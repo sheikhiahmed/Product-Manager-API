@@ -18,7 +18,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-
     services:
       mysql:
         image: mysql:5.7
@@ -44,7 +43,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: build application
+      - name: Build application
         run: |
           mvn clean install
           echo ${{vars.REPOSITORY}}
