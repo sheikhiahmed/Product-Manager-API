@@ -4,6 +4,7 @@ import com.sheikh.productmanager.dao.ProductRepository;
 import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -83,4 +84,18 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public ProductDTO updateProduct(Long id, @Valid ProductDTO productDTO) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(()-> new ProductNotFoundException("product not found Exception with ID: "+id));
+        existingProduct.setName(productDTO.getName());
+        existingProduct.setDescription(productDTO.getDescription());
+        existingProduct.setPrice(productDTO.getPrice());
+        existingProduct.setCategory(productDTO.getCategory());
+        Product updatedProduct = productRepository.save(existingProduct);
+        return ProductDTO.builder()
+                .name(existingProduct.getName())
+                .description(existingProduct.getDescription())
+                .price(existingProduct.getPrice())
+                .category(existingProduct.getCategory()).build();
+    }
 }
