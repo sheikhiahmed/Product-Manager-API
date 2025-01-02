@@ -98,4 +98,10 @@ public class ProductService {
                 .price(existingProduct.getPrice())
                 .category(existingProduct.getCategory()).build();
     }
+
+    public void deleteProduct(Long id) {
+        Product deletedProduct = productRepository.findById(id)
+                .orElseThrow(()-> new ProductNotFoundException("product not found Exception with ID: "+id));
+        productRepository.delete(deletedProduct);
+    }
 }
