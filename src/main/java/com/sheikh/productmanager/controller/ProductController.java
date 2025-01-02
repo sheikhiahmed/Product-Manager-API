@@ -36,13 +36,11 @@ public class ProductController {
 
     //Admin use only
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
-        Product product = productService.getProductById(id);
-        if (product == null) {
-            throw new ProductNotFoundException("Product not found with ID: " + id);
-        }
-        return ResponseEntity.ok().body(product);
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Long id) {
+        ProductDTO productDTO = productService.getProductById(id);
+        return ResponseEntity.ok().body(productDTO);
     }
+
 
     //Admin use only
     @GetMapping("/show")
@@ -57,5 +55,18 @@ public class ProductController {
         return ResponseEntity.ok().body(products);
 
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable ("id") Long id, @Valid @RequestBody ProductDTO productDTO) {
+        ProductDTO updatedProduct = productService.updateProduct(id, productDTO);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable ("id") Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

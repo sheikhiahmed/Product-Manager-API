@@ -4,6 +4,10 @@ import com.sheikh.productmanager.dao.ProductRepository;
 import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,31 +17,22 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public ProductService(ProductRepository productRepository){
+    public ProductService(ProductRepository productRepository, RedisTemplate<String, Object> redisTemplate) {
         this.productRepository = productRepository;
+        this.redisTemplate = redisTemplate;
     }
-    //Received DTO but saved as Entity
+    // Received DTO but saved as Entity
     public ProductDTO createProduct(ProductDTO productDTO) {
-        Product newProduct = new Product();
-        newProduct.setName(productDTO.getName());
-        newProduct.setDescription(productDTO.getDescription());
-        newProduct.setPrice(productDTO.getPrice());
-        newProduct.setCategory(productDTO.getCategory());
+        Product newProduct = new Product(productDTO);
+        Product savedProduct = productRepository.save(newProduct);
 
-        //save to database
-        Product saveProduct = productRepository.save(newProduct);
+        // Save product to cache
+        redisTemplate.opsForHash().put("products", savedProduct.getId().toString(), savedProduct);
 
-        //convert Model back to DTO
-        ProductDTO responseDTO = new ProductDTO();
-        responseDTO.setName(saveProduct.getName());
-        responseDTO.setDescription(saveProduct.getDescription());
-        responseDTO.setPrice(saveProduct.getPrice());
-        responseDTO.setCategory(saveProduct.getCategory());
-
-        return responseDTO;
-
-
+        // Convert Model back to DTO
+        return new ProductDTO(savedProduct);
     }
 
     public List<ProductDTO> getAllProducts() {
@@ -46,41 +41,61 @@ public class ProductService {
             throw new ProductNotFoundException("No Product found");
         }
         // Fetch all products and map them to ProductDTO
-        return productRepository.findAll().stream()
-                .map(product -> new ProductDTO(
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getCategory()
-                ))
-                .collect(Collectors.toList());
+        return products.stream().map(ProductDTO::new).toList();
     }
 
-    public Product getProductById(Long id){
+    @Cacheable(value = "products", key = "#id")
+    public ProductDTO getProductById(Long id) {
+        // Fetch product from cache
+        Product productFromCache = (Product) redisTemplate.opsForHash().get("products", id.toString());
+
+        if (productFromCache != null) {
+            return new ProductDTO(productFromCache); // Return cached product as DTO
+        }
+
+        // Fetch product from DB if not found in cache
         Optional<Product> product = productRepository.findById(id);
-       if(product.isPresent()){
-           return product.get();
-    } else {
-           throw new ProductNotFoundException("No Product Found with id" + id);
-       }
+        if (product.isPresent()) {
+            redisTemplate.opsForHash().put("products", id.toString(), product.get()); // Store product in cache
+            return new ProductDTO(product.get());
+        } else {
+            throw new ProductNotFoundException("No Product Found with id " + id);
+        }
     }
-
     public List<Product> showProducts(){
-        List<Product> p = productRepository.findAll();
-        return p;
+        return productRepository.findAll();
     }
 
 
     public List<ProductDTO> getProductByCategory(String category) {
-        List<Product> products = productRepository.findByCategory(category);
-        return products.stream()
-                .map(product -> new ProductDTO(
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getCategory()
-                ))
-                .collect(Collectors.toList());
+        return productRepository.findByCategory(category).stream().map(ProductDTO::new).toList();
+    }
+
+    @CachePut(value = "products", key = "#id")
+    public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
+        existingProduct.setName(productDTO.getName());
+        existingProduct.setPrice(productDTO.getPrice());
+        existingProduct.setCategory(productDTO.getCategory());
+
+        Product updatedProduct = productRepository.save(existingProduct);
+
+        // Update cache with new product details
+        redisTemplate.opsForHash().put("products", updatedProduct.getId().toString(), updatedProduct);
+
+        return new ProductDTO(updatedProduct);
+    }
+
+
+    @CacheEvict(value = "products", key = "#id")
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
+        productRepository.delete(product);
+
+        // Remove product from cache
+        redisTemplate.opsForHash().delete("products", id.toString());
     }
 
 }

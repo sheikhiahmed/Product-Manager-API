@@ -1,5 +1,7 @@
 package com.sheikh.productmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sheikh.productmanager.dto.ProductDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id
@@ -27,5 +30,13 @@ public class Product {
 
     @NotNull(message = "Category is required.")
     private String category;
+
+    public Product(ProductDTO productDTO) {
+        this.name = productDTO.getName();
+        this.description = productDTO.getDescription();
+        this.price = productDTO.getPrice();
+        this.category = productDTO.getCategory();
+    }
+
 
 }

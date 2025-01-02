@@ -21,4 +21,10 @@ public class ProductDTO {
     @NotNull(message = "Category is required.")
     private String category;
 
+    public ProductDTO(Product product) {
+        this.name = product.getName();
+        this.description = product.getDescription();
+        this.price = product.getPrice();
+        this.category = product.getCategory();
+    }
 }
