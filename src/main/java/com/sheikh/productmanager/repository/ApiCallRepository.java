@@ -1,4 +1,4 @@
-package com.sheikh.productmanager.dao;
+package com.sheikh.productmanager.repository;
 
 import com.sheikh.productmanager.model.ApiCall;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,5 @@
-package com.sheikh.productmanager.dao;
+package com.sheikh.productmanager.repository;
 
-import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;

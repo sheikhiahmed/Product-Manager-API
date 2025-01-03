@@ -1,6 +1,6 @@
 package com.sheikh.productmanager.scheduler;
 
-import com.sheikh.productmanager.dao.ProductRepository;
+import com.sheikh.productmanager.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package com.sheikh.productmanager.service;
 
-import com.sheikh.productmanager.dao.ApiCallRepository;
+import com.sheikh.productmanager.repository.ApiCallRepository;
 import com.sheikh.productmanager.model.ApiCall;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

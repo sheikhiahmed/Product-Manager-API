@@ -1,6 +1,6 @@
 package com.sheikh.productmanager.service;
 
-import com.sheikh.productmanager.dao.ProductRepository;
+import com.sheikh.productmanager.repository.ProductRepository;
 import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
