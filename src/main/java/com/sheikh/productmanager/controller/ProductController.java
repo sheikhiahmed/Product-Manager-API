@@ -36,12 +36,9 @@ public class ProductController {
 
     //Admin use only
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
-        Product product = productService.getProductById(id);
-        if (product == null) {
-            throw new ProductNotFoundException("Product not found with ID: " + id);
-        }
-        return ResponseEntity.ok().body(product);
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+        ProductDTO product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
 
     //Admin use only

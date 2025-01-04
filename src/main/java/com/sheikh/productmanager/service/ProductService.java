@@ -5,6 +5,7 @@ import com.sheikh.productmanager.dto.ProductDTO;
 import com.sheikh.productmanager.exception.ProductNotFoundException;
 import com.sheikh.productmanager.model.Product;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,10 +14,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
+    @Autowired
+    RedisService redisService;
     private final ProductRepository productRepository;
 
     public ProductService(ProductRepository productRepository){
         this.productRepository = productRepository;
+    }
+
+    //maps a Product entity to a ProductDTO
+    private ProductDTO mapToDTO(Product product) {
+        return new ProductDTO(
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getCategory()
+        );
     }
     //Received DTO but saved as Entity
     public ProductDTO createProduct(ProductDTO productDTO) {
@@ -27,18 +40,11 @@ public class ProductService {
         newProduct.setCategory(productDTO.getCategory());
 
         //save to database
-        Product saveProduct = productRepository.save(newProduct);
+        Product savedProduct = productRepository.save(newProduct);
+        ProductDTO responseDTO = mapToDTO(savedProduct);
 
-        //convert Model back to DTO
-        ProductDTO responseDTO = new ProductDTO();
-        responseDTO.setName(saveProduct.getName());
-        responseDTO.setDescription(saveProduct.getDescription());
-        responseDTO.setPrice(saveProduct.getPrice());
-        responseDTO.setCategory(saveProduct.getCategory());
-
+        redisService.save("product:" + savedProduct.getId(), responseDTO);
         return responseDTO;
-
-
     }
 
     public List<ProductDTO> getAllProducts() {
@@ -47,23 +53,21 @@ public class ProductService {
             throw new ProductNotFoundException("No Product found");
         }
         // Fetch all products and map them to ProductDTO
-        return productRepository.findAll().stream()
-                .map(product -> new ProductDTO(
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getCategory()
-                ))
-                .collect(Collectors.toList());
+        return products.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    public Product getProductById(Long id){
-        Optional<Product> product = productRepository.findById(id);
-       if(product.isPresent()){
-           return product.get();
-    } else {
-           throw new ProductNotFoundException("No Product Found with id" + id);
-       }
+    public ProductDTO getProductById(Long id) {
+        ProductDTO cachedProduct = redisService.get("product:" + id, ProductDTO.class);
+        if (cachedProduct != null) {
+            return cachedProduct;
+        }
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("No product found with ID: " + id));
+
+        ProductDTO responseDTO = mapToDTO(product);
+        redisService.save("product:" + id, responseDTO);
+        return responseDTO;
     }
 
     public List<Product> showProducts(){
@@ -84,24 +88,27 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public ProductDTO updateProduct(Long id, @Valid ProductDTO productDTO) {
+    public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(()-> new ProductNotFoundException("product not found Exception with ID: "+id));
+                .orElseThrow(() -> new ProductNotFoundException("No product found with ID: " + id));
+
         existingProduct.setName(productDTO.getName());
         existingProduct.setDescription(productDTO.getDescription());
         existingProduct.setPrice(productDTO.getPrice());
         existingProduct.setCategory(productDTO.getCategory());
+
         Product updatedProduct = productRepository.save(existingProduct);
-        return ProductDTO.builder()
-                .name(existingProduct.getName())
-                .description(existingProduct.getDescription())
-                .price(existingProduct.getPrice())
-                .category(existingProduct.getCategory()).build();
+        ProductDTO responseDTO = mapToDTO(updatedProduct);
+
+        redisService.save("product:" + id, responseDTO);
+        return responseDTO;
     }
 
     public void deleteProduct(Long id) {
-        Product deletedProduct = productRepository.findById(id)
-                .orElseThrow(()-> new ProductNotFoundException("product not found Exception with ID: "+id));
-        productRepository.delete(deletedProduct);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("No product found with ID: " + id));
+
+        productRepository.delete(product);
+        redisService.delete("product:" + id);
     }
 }
