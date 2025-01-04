@@ -57,13 +57,13 @@ public class ProductController {
         return ResponseEntity.ok().body(products);
 
     }
-
+    //Admin and users
     @PutMapping("/update/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDTO productDTO){
         ProductDTO updateProduct = productService.updateProduct(id,productDTO);
         return ResponseEntity.ok(updateProduct);
     }
-
+    //Admin muzahid.
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable ("id") Long id){
         productService.deleteProduct(id);

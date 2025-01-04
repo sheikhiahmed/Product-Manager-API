@@ -19,7 +19,10 @@ public class ApiCallMetricsScheduler {
         List<ApiCall> apiCalls = apiCallService.getAllApiCalls();
         System.out.println("API Call Metrics:");
         for (ApiCall apiCall : apiCalls) {
-            System.out.println("Endpoint: " + apiCall.getEndpoint() + ", Method: " + apiCall.getMethod() + ", Count: " + apiCall.getCount());
+            System.out.println("Endpoint: " + apiCall.getEndpoint() +
+                    ", Method: " + apiCall.getMethod() +
+                    ", Count: " + apiCall.getCount());
         }
     }
 }
+
